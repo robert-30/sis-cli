@@ -1,4 +1,4 @@
-# sisCLI
+# sis-cli
 
 sisCLI offers command line functionality to access osiris.ru.nl for Radboud students. 
 It is shipped with a Python class that serves as an API and that can easily be adapted to other projects and a wrapper around it that serves as the command line interface.
