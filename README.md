@@ -1,9 +1,15 @@
 # sis-cli
 
-sisCLI offers command line functionality to access osiris.ru.nl for Radboud students. 
+sis-cli offers command line functionality to access osiris.ru.nl for Radboud students. 
 It is shipped with a Python class that serves as an API and that can easily be adapted to other projects and a wrapper around it that serves as the command line interface.
 
-To use it, first sign in using
+![](sis-cli-register.png)
+
+## Dependencies
+Install `requests` to use the API, and additionally `click` and `tabulate` to use the client.
+
+## Usage
+First sign in using
 ```
 python sis.py sign-in
 ```

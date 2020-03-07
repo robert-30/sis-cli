@@ -233,5 +233,4 @@ class sisAPI:
         course_info['onderdeel_van'] = ''
         course_info['is_in_enrolment_period'] = False
         course_info['groepen'] = []
-        print(course_info['id_cursus_blok'])
         return self._getData('inschrijvingen/cursussen/' + str(course_info['id_cursus_blok']), 'PUT', json.dumps(course_info))
