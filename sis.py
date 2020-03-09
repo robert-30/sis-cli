@@ -74,7 +74,7 @@ def schedule(n_weeks):
         click.echo('Something went wrong. Try signing in again.');
 
 @click.command()
-def registered():
+def courses():
     try:
         courses = api.registered_courses(100)
 
@@ -91,11 +91,72 @@ def registered():
                 courses_col.append(map (lambda x: click.style(str(x), fg='blue'), course))
 
         column_headers = ['collegejaar', 'blok', 'id_cursus', 'cursus', 'cursus_korte_naam', 'ec']
-
+        
         click.echo(tabulate(courses_col, column_headers, tablefmt='fancy_grid'))
+        
+    except sis.NoTokenError:
+        click.echo('Please sign in again: sis sign_in');
+
+@click.command()
+def exams():
+    try:
+        exams = api.registered_exams(100)
+
+        #filter relevant cells
+        exams = list(map(lambda row: [row['collegejaar'], row['blok'], row['id_cursus'], row['cursus'], row['cursus_korte_naam'], row['id_toets_gelegenheid'], row['toets_omschrijving'], row['gelegenheid'], row['toetsdatum'], row['dag']], exams))
+        for exam in exams:
+            if exam[-2] is None:
+                exam[-2] = ''
+        exams = sorted(exams, key = lambda exam: str(exam[-2]))
+        exams_col = []
+
+        for exam in exams:
+            if exam[-3] == 1:
+                exams_col.append(map (lambda x: click.style(str(x), fg='green'), exam))
+            else:
+                exams_col.append(map (lambda x: click.style(str(x), fg='yellow'), exam))
+
+        column_headers = ['collegejaar', 'blok', 'id_cursus', 'cursus', 'cursus_korte_naam', 'id_toets_gelegenheid', 'omschrijving', 'gelegenheid', 'toetsdatum', 'dag']
+
+        click.echo(tabulate(exams_col, column_headers, tablefmt='fancy_grid'))
 
     except sis.NoTokenError:
         click.echo('Please sign in again: sis sign_in');
+
+
+@click.command()
+@click.argument('id_cursus')
+def newexam(id_cursus):
+    try:
+        course_info_tests = api.get_tests_for_course(id_cursus)
+
+        conf_msg = ''
+        headers = ['collegejaar', 'cursus', 'cursus_korte_naam']
+        for header in headers:
+            conf_msg = conf_msg + str(course_info_tests[header]) + '\t'
+        conf_msg += '\n'        
+        
+        test_headers = ['id_toets_gelegenheid', 'toets_omschrijving', 'gelegenheid', 'toetsdatum', 'dag']
+        tests_table = []
+        for test in course_info_tests['toetsen']:
+            test_info = []
+            for header in test_headers:
+                test_info.append(test[header])
+            tests_table.append(test_info)
+        
+        conf_msg += tabulate(tests_table, headers=test_headers) + '\n'
+        click.echo(conf_msg)
+        id_toets = click.prompt('Which test would you like to register to? id_toets_gelegenheid', type=str)
+        for test in course_info_tests['toetsen']:
+            if str(test['id_toets_gelegenheid']) == id_toets:
+                if api.register_for_test(test).status_code == 200:
+                    click.echo(click.style('Registration successful!', fg='green'))
+                    return
+                else:
+                    click.echo(click.style('Registration failed.', fg='red'))
+        click.echo(click.style('Test not found.', fg='red'))
+    except sis.NoTokenError:
+        click.echo('Please sign in again: sis sign_in')
 
 @click.command()
 @click.argument('query')
@@ -104,7 +165,7 @@ def search(query):
         hits = api.search_for_course(query)['hits']
         print(str(hits['total']) + ' hit(s) found')
         
-        headers = ['id_cursus_blok', 'collegejaar', 'blok', 'cursus', 'cursus_korte_naam', 'punten']
+        headers = ['id_cursus_blok', 'id_cursus', 'collegejaar', 'blok', 'cursus', 'cursus_korte_naam', 'punten']
         results_table = []
         
         for hit in hits['hits']:
@@ -135,7 +196,7 @@ def search(query):
 
 @click.command()
 @click.argument('id_cursus_blok')
-def register(id_cursus_blok):
+def newcourse(id_cursus_blok):
     try:
         course_info = api.get_course_info(id_cursus_blok)
         
@@ -173,8 +234,9 @@ def register(id_cursus_blok):
 osiris.add_command(sign_in)
 osiris.add_command(grades)
 osiris.add_command(schedule)
-osiris.add_command(registered)
+osiris.add_command(courses)
 osiris.add_command(search)
-osiris.add_command(register)
+osiris.add_command(newcourse)
+osiris.add_command(newexam)
+osiris.add_command(exams)
 osiris()
-

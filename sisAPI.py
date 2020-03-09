@@ -186,6 +186,21 @@ class sisAPI:
         assert isinstance(limit, int)
 
         return list(self._getData('inschrijvingen/cursussen').json()['items']) + list(self._getData('inschrijvingen/wachtlijsten_cursus').json()['items']) + list(self._getData('inschrijvingen/voorinschrijvingen_cursus').json()['items'])
+    
+    def registered_exams(self, limit:int):
+        """
+        Returns list of exams registered for
+
+        Args:
+            limit: int, maximum number of exams
+
+        Return:
+            list of exams registered for
+        """
+
+        assert isinstance(limit, int)
+
+        return list(self._getData('inschrijvingen/toetsen?limit=' + str(limit)).json()['items'])
 
     def search_for_course(self, query:str):
         """
@@ -210,6 +225,30 @@ class sisAPI:
             information about course
         """
         return self._getData('cursussen_voor_cursusinschrijving/' + str(course_id)).json()
+
+    def get_tests_for_course(self, course_id:str):
+        """
+        Obtains information about test
+
+        Args:
+            test_id: str, id_cursus
+
+        Return:
+            information about test
+        """
+        return self._getData('cursussen_voor_toetsinschrijving/' + str(course_id)).json()
+
+    def register_for_test(self, test_info):
+        """
+        Registers for test
+        
+        Args:
+            test_info: information about the test
+
+        Return:
+
+        """
+        return self._getData('inschrijvingen/toetsen/', 'POST', '{"toetsen": [' + json.dumps(test_info) + ']}')
 
     def register_for_course(self, course_info):
         """
