@@ -56,7 +56,7 @@ class sisAPI:
         ses = requests.Session()
         req1 = requests.Request('GET', 'https://auth-app-ruprd-ruprd.xpaas.caci.nl/oauth2/authorize?response_type=token&client_id=osiris-student-mobile-ruprd&redirect_uri=https://ru.osiris-student.nl').prepare()
         r = ses.send(req1)
-        _assureSuccess(r)
+        self._assureSuccess(r)
 
         auth_state_start_idx = r.url.find('AuthState=')+10
 
@@ -69,15 +69,14 @@ class sisAPI:
 
         req2 = requests.Request('POST', 'https://conext.authenticatie.ru.nl/simplesaml/module.php/core/loginuserpass.php?', params=payload, cookies=r.cookies).prepare()
         r2 = ses.send(req2)
-        _assureSuccess(r2)
-
+        self._assureSuccess(r2)
         saml_form = r2.text[r2.text.find('name="SAMLResponse"')+27:]
         saml_form = saml_form[:saml_form.find('"')]
 
         req = requests.Request('POST', 'https://engine.surfconext.nl/authentication/sp/consume-assertion', data={'SAMLResponse': saml_form}, cookies={'main': ses.cookies.get('main'), 'HTTPSERVERID': ses.cookies.get('HTTPSERVERID')})
         r3 = req.prepare()
         ret = ses.send(r3)
-        _assureSuccess(ret)
+        self._assureSuccess(ret)
 
         saml_form = ret.text[ret.text.find('name="SAMLResponse"')+27:]
         saml_form = saml_form[:saml_form.find('"')]
@@ -87,7 +86,7 @@ class sisAPI:
 
         req = requests.Request('POST', 'https://auth-app-ruprd-ruprd.xpaas.caci.nl/oauth2/authorize', data={'SAMLResponse': saml_form, 'RelayState': relay_state}, cookies={}).prepare()
         ret = ses.send(req)
-        _assureSuccess(ret)
+        self._assureSuccess(ret)
 
         access_token = ret.url[ret.url.find('access_token')+13:]
         access_token = access_token[:access_token.find('&')]
@@ -134,9 +133,9 @@ class sisAPI:
         
         assert isinstance(username, str)
         assert isinstance(password, str)
-
+        
         try:
-            self.access_token = self._getToken(self, username, password)
+            self.access_token = self._getToken(username, password)
             token_file = open(os.environ['HOME'] + '/.osiris_token', 'w')
             token_file.write(self.access_token)
             return True

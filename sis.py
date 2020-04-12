@@ -46,10 +46,9 @@ def grades():
 def schedule(n_weeks):
     try:
         DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-        LEC_TYPE_COLO = {'LEC': 'green', 'TUT': 'blue', 'DIGI-INZAGE': 'yellow', 'EXA': 'red', 'COMP': 'cyan'}
+        LEC_TYPE_COLO = {'LEC': 'green', 'TUT': 'blue', 'DIGI-INZAGE': 'yellow', 'EXA': 'red', 'COMP': 'cyan', 'DLT': 'red', 'PRE': 'green'}
  
         sched = api.schedule(n_weeks)
-
         sched_list = []
         for week in sched:
             for day_idx in range(0, 7):
