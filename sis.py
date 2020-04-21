@@ -1,9 +1,11 @@
 import click
 from tabulate import tabulate
 import sisAPI as sis
+import os
+import sisutil
 
 api = sis.sisAPI()
-
+ 
 @click.group()
 def osiris():
     pass
@@ -45,32 +47,24 @@ def grades():
 @click.option('--n_weeks', '-w', 'n_weeks', default=1)
 def schedule(n_weeks):
     try:
-        DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-        LEC_TYPE_COLO = {'LEC': 'green', 'TUT': 'blue', 'DIGI-INZAGE': 'yellow', 'EXA': 'red', 'COMP': 'cyan', 'DLT': 'red', 'PRE': 'green', 'LAB': 'magenta', 'RSP': 'bright_blue'}
- 
+        cached = sisutil.read_schedule(os.environ['HOME'] + '/.osiris_schedule.txt')
+        if cached is not None:
+            cached_sched = cached[0]
+            retrieved_time = cached[1]
+            click.secho('CACHED SCHEDULE || MAY BE OUTDATED || RETRIEVED ON ' + retrieved_time, fg='red', bg='cyan')
+            click.secho('CACHED SCHEDULE || MAY BE OUTDATED || RETRIEVED ON ' + retrieved_time, fg='red', bg='cyan')
+            click.secho('CACHED SCHEDULE || MAY BE OUTDATED || RETRIEVED ON ' + retrieved_time, fg='red', bg='cyan')
+            sched_styled = sisutil.style_schedule(cached_sched)
+            click.echo(sched_styled)
+            click.secho('CACHED SCHEDULE || MAY BE OUTDATED || RETRIEVED ON ' + retrieved_time, fg='red', bg='cyan')
+            click.secho('CACHED SCHEDULE || MAY BE OUTDATED || RETRIEVED ON ' + retrieved_time, fg='red', bg='cyan')
+            click.secho('CACHED SCHEDULE || MAY BE OUTDATED || RETRIEVED ON ' + retrieved_time, fg='red', bg='cyan')
         sched = api.schedule(n_weeks)
         sched_list = []
-        for week in sched:
-            for day_idx in range(0, 7):
-                day = week['dagen'][day_idx]
-
-                for subj_idx in range(0, len(day['rooster'])):
-                    subj = day['rooster'][subj_idx]
-                    
-                    # only fill in a value for week or day if it's the first
-                    week_text = ''
-                    day_text = ''
-
-                    if subj_idx == 0:
-                        if day_idx == 0:
-                            week_text = 'Week ' + str(week['week'])
-                        day_text = DAYS[day_idx]
-                    
-                    subj_name = subj['onderwerp'][subj['onderwerp'].find(' ')+1:]
-                    sched_list.append([click.style(week_text, bg='blue'), click.style(day_text, bg='green'), click.style(subj_name, fg=LEC_TYPE_COLO[subj['soort_rooster']]), subj['tijd_vanaf'], subj['tijd_tm'], subj['locatie']])
-        click.echo_via_pager(tabulate(sched_list, tablefmt='fancy_grid'))
+        click.echo_via_pager(sisutil.style_schedule(sched))
+        sisutil.write_schedule(os.environ['HOME'] + '/.osiris_schedule.txt', sched)
     except sis.NoTokenError:
-        click.echo('Something went wrong. Try signing in again.')
+        click.echo('No token found. Try signing in again.')
     except KeyError as inst:
         click.echo('Unkown lecture type. Please add an issue on github and mention that the lecture type ' + str(inst) + ' is missing.')
 
