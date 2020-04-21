@@ -46,7 +46,7 @@ def grades():
 def schedule(n_weeks):
     try:
         DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-        LEC_TYPE_COLO = {'LEC': 'green', 'TUT': 'blue', 'DIGI-INZAGE': 'yellow', 'EXA': 'red', 'COMP': 'cyan', 'DLT': 'red', 'PRE': 'green', 'RSP': 'bright_blue', 'LAB': 'magenta'}
+        LEC_TYPE_COLO = {'LEC': 'green', 'TUT': 'blue', 'DIGI-INZAGE': 'yellow', 'EXA': 'red', 'COMP': 'cyan', 'DLT': 'red', 'PRE': 'green', 'LAB': 'magenta', 'RSP': 'bright_blue'}
  
         sched = api.schedule(n_weeks)
         sched_list = []
@@ -69,9 +69,10 @@ def schedule(n_weeks):
                     subj_name = subj['onderwerp'][subj['onderwerp'].find(' ')+1:]
                     sched_list.append([click.style(week_text, bg='blue'), click.style(day_text, bg='green'), click.style(subj_name, fg=LEC_TYPE_COLO[subj['soort_rooster']]), subj['tijd_vanaf'], subj['tijd_tm'], subj['locatie']])
         click.echo_via_pager(tabulate(sched_list, tablefmt='fancy_grid'))
-    except(e):
+    except sis.NoTokenError:
         click.echo('Something went wrong. Try signing in again.')
-        print(e)
+    except KeyError as inst:
+        click.echo('Unkown lecture type. Please add an issue on github and mention that the lecture type ' + str(inst) + ' is missing.')
 
 @click.command()
 def courses():
