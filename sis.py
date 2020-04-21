@@ -46,7 +46,7 @@ def grades():
 def schedule(n_weeks):
     try:
         DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-        LEC_TYPE_COLO = {'LEC': 'green', 'TUT': 'blue', 'DIGI-INZAGE': 'yellow', 'EXA': 'red', 'COMP': 'cyan', 'DLT': 'red', 'PRE': 'green'}
+        LEC_TYPE_COLO = {'LEC': 'green', 'TUT': 'blue', 'DIGI-INZAGE': 'yellow', 'EXA': 'red', 'COMP': 'cyan', 'DLT': 'red', 'PRE': 'green', 'RSP': 'bright_blue', 'LAB': 'magenta'}
  
         sched = api.schedule(n_weeks)
         sched_list = []
@@ -69,8 +69,9 @@ def schedule(n_weeks):
                     subj_name = subj['onderwerp'][subj['onderwerp'].find(' ')+1:]
                     sched_list.append([click.style(week_text, bg='blue'), click.style(day_text, bg='green'), click.style(subj_name, fg=LEC_TYPE_COLO[subj['soort_rooster']]), subj['tijd_vanaf'], subj['tijd_tm'], subj['locatie']])
         click.echo_via_pager(tabulate(sched_list, tablefmt='fancy_grid'))
-    except:
-        click.echo('Something went wrong. Try signing in again.');
+    except(e):
+        click.echo('Something went wrong. Try signing in again.')
+        print(e)
 
 @click.command()
 def courses():
