@@ -131,24 +131,26 @@ def newexam(id_cursus):
             conf_msg = conf_msg + str(course_info_tests[header]) + '\t'
         conf_msg += '\n'        
         
-        test_headers = ['id_toets_gelegenheid', 'toets_omschrijving', 'gelegenheid', 'toetsdatum', 'dag']
+        test_headers = ['toets_omschrijving', 'gelegenheid', 'toetsdatum', 'dag']
         tests_table = []
+        test_idx = 0
         for test in course_info_tests['toetsen']:
-            test_info = []
+            test_info = [test_idx]
+            test_idx += 1
             for header in test_headers:
                 test_info.append(test[header])
             tests_table.append(test_info)
         
-        conf_msg += tabulate(tests_table, headers=test_headers) + '\n'
+        conf_msg += tabulate(tests_table, headers=['test_idx'] + test_headers) + '\n'
         click.echo(conf_msg)
-        id_toets = click.prompt('Which test would you like to register to? id_toets_gelegenheid', type=str)
-        for test in course_info_tests['toetsen']:
-            if str(test['id_toets_gelegenheid']) == id_toets:
-                if api.register_for_test(test).status_code == 200:
-                    click.echo(click.style('Registration successful!', fg='green'))
-                    return
-                else:
-                    click.echo(click.style('Registration failed.', fg='red'))
+        test_idx = int(click.prompt('Which test would you like to register to? test_idx', type=str))
+        if test_idx < len(course_info_tests):
+            test = course_info_tests['toetsen'][test_idx]
+            if api.register_for_test(test).status_code == 200:
+                click.echo(click.style('Registration successful!', fg='green'))
+                return
+            else:
+                click.echo(click.style('Registration failed.', fg='red'))
         click.echo(click.style('Test not found.', fg='red'))
     except sis.NoTokenError:
         click.echo('Please sign in again: sis sign_in')
