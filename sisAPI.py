@@ -16,9 +16,9 @@ class sisAPI:
     """
     This class provides an API for retrieving data from osiris.ru.nl
 
-   
+
     """
-    
+
     def _readToken(self):
         """
         Try to find previously stored token at ~/.osiris_token
@@ -32,8 +32,8 @@ class sisAPI:
             if access_token is None:
                 return None
             self.access_token = access_token
-        except:    
-            return None 
+        except:
+            return None
 
     def _assureSuccess(self, ret):
         """
@@ -91,7 +91,7 @@ class sisAPI:
         access_token = ret.url[ret.url.find('access_token')+13:]
         access_token = access_token[:access_token.find('&')]
         return access_token
-    
+
     def _getData(self, suff : str, method : str = 'GET', payload : str = ""):
         """
         Helper method for executing GET requests
@@ -104,10 +104,10 @@ class sisAPI:
         Return:
             request response
         """
-        
+
         assert(method == 'POST' or method == 'GET' or method == 'PUT')
         assert isinstance(suff, str)
-        assert isinstance(payload, str) 
+        assert isinstance(payload, str)
 
         if self.access_token is None:
             raise NoTokenError()
@@ -118,7 +118,7 @@ class sisAPI:
     def __init__(self):
         self.access_token = None
         self._readToken()
-    
+
     def sign_in(self, username:str, password:str):
         """
         Sign in using credentials and store new token
@@ -130,10 +130,10 @@ class sisAPI:
         Return:
             Login success status
         """
-        
+
         assert isinstance(username, str)
         assert isinstance(password, str)
-        
+
         try:
             self.access_token = self._getToken(username, password)
             token_file = open(os.environ['HOME'] + '/.osiris_token', 'w')
@@ -151,7 +151,7 @@ class sisAPI:
         Return:
             List of grades
         """
-        
+
         assert isinstance(limit, int)
 
         return self._getData('resultaten?limit=' + str(limit)).json()['items']
@@ -166,7 +166,7 @@ class sisAPI:
         Return:
             Next n_weeks of schedule
         """
-        
+
         assert isinstance(n_weeks, int)
 
         return self._getData('rooster/per_week?limit=' + str(n_weeks)).json()['items']
@@ -185,7 +185,7 @@ class sisAPI:
         assert isinstance(limit, int)
 
         return list(self._getData('inschrijvingen/cursussen').json()['items']) + list(self._getData('inschrijvingen/wachtlijsten_cursus').json()['items']) + list(self._getData('inschrijvingen/voorinschrijvingen_cursus').json()['items'])
-    
+
     def registered_exams(self, limit:int):
         """
         Returns list of exams registered for
@@ -204,7 +204,7 @@ class sisAPI:
     def search_for_course(self, query:str):
         """
         Returns list of results after searching for query
-        
+
         Args:
             query: str, query to search for
 
@@ -240,7 +240,7 @@ class sisAPI:
     def register_for_test(self, test_info):
         """
         Registers for test
-        
+
         Args:
             test_info: information about the test
 

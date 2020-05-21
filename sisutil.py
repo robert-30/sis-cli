@@ -14,7 +14,7 @@ def style_schedule(sched):
 
             for subj_idx in range(0, len(day['rooster'])):
                 subj = day['rooster'][subj_idx]
-                
+
                 # only fill in a value for week or day if it's the first
                 week_text = ''
                 day_text = ''
@@ -23,7 +23,7 @@ def style_schedule(sched):
                     if day_idx == 0:
                         week_text = 'Week ' + str(week['week'])
                     day_text = DAYS[day_idx]
-                
+
                 subj_name = subj['onderwerp'][subj['onderwerp'].find(' ')+1:]
                 sched_list.append([click.style(week_text, bg='blue'), click.style(day_text, bg='green'), click.style(subj_name, fg=LEC_TYPE_COLO[subj['soort_rooster']]), subj['tijd_vanaf'], subj['tijd_tm'], subj['locatie']])
     return tabulate(sched_list, tablefmt='fancy_grid')
