@@ -5,7 +5,7 @@ import os
 import sisutil
 
 api = sis.sisAPI()
- 
+
 @click.group()
 def osiris():
     pass
@@ -14,7 +14,7 @@ def osiris():
 def sign_in():
     username = click.prompt('s-number', type=str)
     password = click.prompt('password', type=str, hide_input=True)
-    
+
     if api.sign_in(username, password):
         click.secho('sign in successful', fg='green')
     else:
@@ -34,7 +34,7 @@ def grades():
             colo = 'red'
             if row[-1] == 'J':
                 colo = 'green'
-            
+
             res_row.append(click.style(row[-2], fg=colo))
             grades_col.append(res_row)
         click.echo_via_pager(tabulate(grades_col, column_headers, tablefmt='fancy_grid'))
@@ -76,7 +76,7 @@ def courses():
         #filter relevant cells
         courses = list(map(lambda row: [row['collegejaar'], row['blok'], row['id_cursus'], row['cursus'], row['cursus_korte_naam'], row['punten']], courses))
         courses = sorted(courses, key = lambda course: str(course[0]) + course[1] + str(course[2]))
-        
+
         courses_col = []
 
         for course in courses:
@@ -86,9 +86,9 @@ def courses():
                 courses_col.append(map (lambda x: click.style(str(x), fg='blue'), course))
 
         column_headers = ['collegejaar', 'blok', 'id_cursus', 'cursus', 'cursus_korte_naam', 'ec']
-        
+
         click.echo(tabulate(courses_col, column_headers, tablefmt='fancy_grid'))
-        
+
     except sis.NoTokenError:
         click.echo('Please sign in again: sis sign_in');
 
@@ -129,8 +129,8 @@ def newexam(id_cursus):
         headers = ['collegejaar', 'cursus', 'cursus_korte_naam']
         for header in headers:
             conf_msg = conf_msg + str(course_info_tests[header]) + '\t'
-        conf_msg += '\n'        
-        
+        conf_msg += '\n'
+
         test_headers = ['toets_omschrijving', 'gelegenheid', 'toetsdatum', 'dag']
         tests_table = []
         test_idx = 0
@@ -140,7 +140,7 @@ def newexam(id_cursus):
             for header in test_headers:
                 test_info.append(test[header])
             tests_table.append(test_info)
-        
+
         conf_msg += tabulate(tests_table, headers=['test_idx'] + test_headers) + '\n'
         click.echo(conf_msg)
         test_idx = int(click.prompt('Which test would you like to register to? test_idx', type=str))
@@ -161,29 +161,29 @@ def search(query):
     try:
         hits = api.search_for_course(query)['hits']
         print(str(hits['total']) + ' hit(s) found')
-        
+
         headers = ['id_cursus_blok', 'id_cursus', 'collegejaar', 'blok', 'cursus', 'cursus_korte_naam', 'punten']
         results_table = []
-        
+
         for hit in hits['hits']:
             result = []
             for header in headers:
                 result.append(hit['_source'][header])
-            
+
             can_register = False
 
             for registration_period in hit['_source']['inschrijfperiodes']:
                 can_register=True
-            
+
             fg_color = None
-            
+
             if can_register:
                 fg_color = 'green'
             else:
                 fg_color = 'red'
 
             result.append(click.style(str(can_register), fg=fg_color))
-                
+
 
             results_table.append(result)
 
@@ -196,23 +196,23 @@ def search(query):
 def newcourse(id_cursus_blok):
     try:
         course_info = api.get_course_info(id_cursus_blok)
-        
+
         conf_msg = ''
         headers = ['collegejaar', 'blok', 'cursus', 'cursus_korte_naam', 'categorie_omschrijving', 'punten']
         for header in headers:
             conf_msg = conf_msg + str(course_info[header]) + '\t'
-        conf_msg += '\n'        
-        
+        conf_msg += '\n'
+
         study_table = []
         for studytype in course_info['werkvorm_voorzieningen']:
             study_table.append([studytype['werkvorm'], studytype['werkvorm_omschrijving']])
-        
+
         conf_msg += tabulate(study_table, headers=['Study types', '']) + '\n'
-        
+
         test_table = []
         for testtype in course_info['toets_voorzieningen']:
             test_table.append([testtype['toets'], testtype['toets_omschrijving']])
-        
+
         conf_msg += tabulate(test_table, headers=['Test types', ''])
         click.echo(conf_msg)
 
